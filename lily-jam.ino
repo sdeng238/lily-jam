@@ -3,7 +3,7 @@
 #include <esp_now.h>
 
 #define TEAM_ID 1
-#define PLAYER_ID 0       // Change to 1 on the second ESP32
+#define PLAYER_ID 1       // Change to 1 on the second ESP32
 #define BUTTON_A 0
 #define BUTTON_B 35
 
