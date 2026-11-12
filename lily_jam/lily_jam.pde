@@ -21,13 +21,14 @@ ArrayList<Note> notes = new ArrayList<Note>();
 ArrayList<Entry> board = new ArrayList<Entry>();
 
 PImage[] avatars = new PImage[2];
+PImage bg;
 
 String[] names = {"", ""};
 String[] feedback = {"", ""};
 int[] feedbackAt = {0, 0};
 int state = 0;
 int nameIndex = 0;
-int score = 0
+int score = 0;
 int perfects = 0;
 int goods = 0;
 int misses = 0;
@@ -38,9 +39,12 @@ void setup() {
   pixelDensity(displayDensity());
   textAlign(CENTER, CENTER);
   
+  // font source: https://www.1001fonts.com/pixelpurl-font.html
   PFont pixelated;
   pixelated = createFont("PixelPurl.ttf", 128);
   textFont(pixelated);
+  
+  bg = loadImage("bg.png");
   
   printArray(Serial.list());
   port = new Serial(this, Serial.list()[4], 115200);
@@ -77,6 +81,7 @@ void draw() {
 
   // display main menu (start screen)
   if (state == 0) {
+    image(bg, 0, 0, width, height);
     fill(89, 61, 53);
     textSize(52);
     text("lily jam", 400, 90);
@@ -94,12 +99,13 @@ void draw() {
     fill(89, 61, 53);
     text("Press ENTER to continue", 400, 360);
   
-    drawBoard(430);
+    drawBoard(410);
     return;
   }
 
   // game over screen
   if (state == 2) {
+    image(bg, 0, 0, width, height);
     textSize(50);
     text("SONG COMPLETE!", 400, 55);
   
@@ -118,7 +124,7 @@ void draw() {
     textSize(30);
     fill(89, 61, 53);
     if (finalRank > 0)
-      text("Leaderboard Rank #" + finalRank, 400, 275);
+      text("Leaderboard Rank #" + finalRank, 400, 260);
     else
       text("Not in Top 5", 400, 275);
   
