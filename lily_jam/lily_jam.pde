@@ -4,6 +4,10 @@ import processing.sound.*;
 import java.util.*;
 import java.io.File;
 
+// main text: dark brown = 89, 61, 53
+// p1: green = 40, 104, 62
+// p2: red = 181, 47, 65
+
 Serial port;
 SoundFile song;
 
@@ -18,32 +22,25 @@ ArrayList<Entry> board = new ArrayList<Entry>();
 
 PImage[] avatars = new PImage[2];
 
-String[] names = {"", ""}, feedback = {"", ""};
+String[] names = {"", ""};
+String[] feedback = {"", ""};
 int[] feedbackAt = {0, 0};
-int state = 0, nameIndex = 0;
-int score = 0, perfects = 0, goods = 0, misses = 0;
+int state = 0;
+int nameIndex = 0;
+int score = 0
+int perfects = 0;
+int goods = 0;
+int misses = 0;
 
-class Note {
-  int player, button, points = -1, hitAt = 0;
-  float time;
-  Note(int p, int b, float t) {
-    player = p; button = b; time = t;
-  }
-}
-
-class Entry {
-  String name;
-  int score;
-  float accuracy;
-  Entry(String n, int s, float a) {
-    name = n; score = s; accuracy = a;
-  }
-}
 
 void setup() {
   size(800, 600);
   pixelDensity(displayDensity());
   textAlign(CENTER, CENTER);
+  
+  PFont pixelated;
+  pixelated = createFont("PixelPurl.ttf", 128);
+  textFont(pixelated);
   
   printArray(Serial.list());
   port = new Serial(this, Serial.list()[4], 115200);
@@ -63,11 +60,10 @@ void makeChart() {
   int[] counts = {0, 0};
 
   for (float t = OFFSET; t < DURATION; t += BEAT) {
-    // Balance notes between players
+    // randomize mapping of notes
     int p = counts[0] == counts[1] ? int(random(2)) :
             (counts[0] < counts[1] ? 0 : 1);
 
-    // Randomly assign button A or B
     int b = int(random(2));
 
     notes.add(new Note(p, b, t));
@@ -79,15 +75,16 @@ void draw() {
   background(246, 229, 206);
   fill(88, 60, 51);
 
+  // display main menu (start screen)
   if (state == 0) {
     fill(89, 61, 53);
-    textSize(44);
+    textSize(52);
     text("lily jam", 400, 90);
   
     image(avatars[0], 250, 150, 100, 100);
     image(avatars[1], 450, 150, 100, 100);
   
-    textSize(20);
+    textSize(28);
     fill(40, 104, 62);
     text("Player 0: " + names[0] + (nameIndex == 0 ? "_" : ""), 300, 290);
   
@@ -101,30 +98,33 @@ void draw() {
     return;
   }
 
-  
+  // game over screen
   if (state == 2) {
-    textSize(36);
+    textSize(50);
     text("SONG COMPLETE!", 400, 55);
   
-    textSize(20);
+    textSize(24);
+    fill(40, 104, 62);
     text(names[0] + " + " + names[1], 400, 105);
   
     textSize(30);
     text("Final score: " + score, 400, 155);
   
-    textSize(18);
+    textSize(24);
+    fill(181, 47, 65);
     text("Perfect: " + perfects + "   Good: " + goods +
          "   Miss: " + misses, 400, 230);
   
-    textSize(22);
+    textSize(30);
+    fill(89, 61, 53);
     if (finalRank > 0)
       text("Leaderboard Rank #" + finalRank, 400, 275);
     else
       text("Not in Top 5", 400, 275);
   
-    drawBoard(320);
+    drawBoard(350);
   
-    textSize(20);
+    textSize(30);
     text("Press R to restart", 400, 555);
     return;
   }
@@ -136,7 +136,7 @@ void draw() {
   textSize(44);
   text(score, 400, 35);
 
-  // Draw lanes
+  // draw lanes
   for (int p = 0; p < 2; p++) {
     int center = 250 + p * 300;
     fill(p == 0 ? color(40, 104, 62) : color(181, 47, 65));
@@ -163,7 +163,7 @@ void draw() {
   line(100, HIT_Y, 700, HIT_Y);
   noStroke();
 
-  // Draw and score notes
+  // draw and score notes
   for (Note n : notes) {
     float y = HIT_Y - (n.time - t) * SPEED;
     int x = 200 + n.player * 300 + n.button * 100;
@@ -177,14 +177,15 @@ void draw() {
     if (n.points == -1 && y >= 120 && y <= 520) {
       fill(n.player == 0 ? color(85, 173, 101) : color(233, 75, 85));
       rect(x - 35, y - 13, 70, 26, 6);
-    } else if (n.points > 0 && millis() - n.hitAt < 200) {
+    }
+    else if (n.points > 0 && millis() - n.hitAt < 200) {
       fill(n.points == 100 ? color(255) :
            n.player == 0 ? color(255, 200, 225) : color(209, 245, 229));
       rect(x - 35, y - 13, 70, 26, 6);
     }
   }
 
-  // end of game
+  // game ends when song ends
   if (t >= DURATION + GOOD || !song.isPlaying()) {
     song.stop();
     saveScore();
@@ -247,8 +248,13 @@ void keyPressed() {
   } 
   else if (state == 0) {
     if (key == ENTER || key == RETURN) {
-      if (trim(names[nameIndex]).isEmpty()) return;
-      if (nameIndex == 0) nameIndex = 1;
+      if (trim(names[nameIndex]).isEmpty()) {
+        return;
+      }
+      
+      if (nameIndex == 0) {
+        nameIndex = 1;
+      }
       else {
         score = perfects = goods = misses = 0;
         feedbackAt = new int[]{-10000, -10000};
@@ -258,16 +264,18 @@ void keyPressed() {
         song.play();
         state = 1;
       }
-    } else if (key == BACKSPACE && names[nameIndex].length() > 0) {
+    } 
+    else if (key == BACKSPACE && names[nameIndex].length() > 0) {
       names[nameIndex] = names[nameIndex].substring(0, names[nameIndex].length()-1);
-    } else if (key >= 32 && key <= 126 && key != '|' &&
+    } 
+    else if (key >= 32 && key <= 126 && key != '|' &&
                names[nameIndex].length() < 16) {
       names[nameIndex] += key;
     }
   }
 }
 
-// LEADERBOARD
+
 void loadBoard() {
   if (!new File(sketchPath("leaderboard.txt")).exists()) return;
   for (String line : loadStrings("leaderboard.txt")) {
@@ -278,9 +286,13 @@ void loadBoard() {
   sortBoard();
 }
 
+
 void sortBoard() {
   board.sort((a, b) -> Float.compare(b.accuracy, a.accuracy));
-  while (board.size() > 5) board.remove(board.size()-1);
+  
+  while (board.size() > 5) {
+    board.remove(board.size()-1);
+  }
 }
 
 void saveScore() {
@@ -293,17 +305,19 @@ void saveScore() {
         e.score = score;
         e.accuracy = accuracy();
       }
+      
       found = true;
       break;
     }
   }
 
-  if (!found)
+  if (!found) {
     board.add(new Entry(team, score, accuracy()));
+  }
 
   sortBoard();
 
-  // Find team ranking
+  // get team ranking
   finalRank = -1;
   for (int i = 0; i < board.size(); i++) {
     if (board.get(i).name.equalsIgnoreCase(team)) {
@@ -317,24 +331,30 @@ void saveScore() {
     Entry e = board.get(i);
     lines[i] = e.name + "|" + e.score + "|" + e.accuracy;
   }
+  
   saveStrings(sketchPath("leaderboard.txt"), lines);
+  
 }
 
 
 void drawBoard(int y) {
   fill(89, 61, 53);
-  textSize(22);
+  textSize(26);
   text("TOP 5 TEAMS", 400, y);
 
-  textSize(16);
+  textSize(20);
+  
   for (int i = 0; i < board.size(); i++) {
     Entry e = board.get(i);
     String team = names[0] + " + " + names[1];
 
-    if (state == 2 && e.name.equalsIgnoreCase(team))
-      fill(181, 47, 65); // Highlight current team
-    else
+    if (state == 2 && e.name.equalsIgnoreCase(team)) {
+      // diff color for current team
+      fill(181, 47, 65);
+    }
+    else {
       fill(89, 61, 53);
+    }
 
     text((i+1) + ". " + e.name + ": " + e.score + " pts",
          400, y + 35 + i*27);
