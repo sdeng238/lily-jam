@@ -38,6 +38,6 @@ Setup
 7) Run the Processing sketch. The game display should pop up in a separate window. Enter both players' names and press Enter to begin!
 8) The leaderboard stores each team's best performance, ranked by accuracy percentage, and persists between games.
 
-Live Demo w/ Hardware
+Showcase
 ---
 https://github.com/user-attachments/assets/dcd78a3b-cf82-4486-80dc-2bb8227a0540
