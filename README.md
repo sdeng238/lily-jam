@@ -2,8 +2,7 @@
 
 ### Module 3: Distributed Communication
 *lily jam* is an interactive hardware project that uses ESP-NOW communication between two ESP32 boards to play a cooperative rhythm game. During the game, two players attempt to earn the highest combined team score by pressing the buttons on their ESP32s as notes reach the hit line in their respective lanes. Depending on their timing accuracy, players earn 100 points for a Perfect hit, 50 for a Good hit, and 0 for a Miss. The game is inspired by Piano Tiles and various K-pop rhythm games -- the current version features "What is Love?" by TWICE as the backing track! The visual interface is displayed using Processing.
-
-<< insert screen recording of gameplay >>
+<img width="800" height="450" alt="lily_jam_snippet-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/0f8e9fc0-d1eb-4a4a-adb4-ad7189dd6740" />
 
 ### Controls:
 - Player 0: left two lanes (lily)
