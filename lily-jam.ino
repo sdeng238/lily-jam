@@ -3,7 +3,7 @@
 #include <esp_now.h>
 
 #define TEAM_ID 1
-#define PLAYER_ID 1       // Change to 1 on the second ESP32
+#define PLAYER_ID 0        // TODO: change to 1 on the second ESP32
 #define BUTTON_A 0
 #define BUTTON_B 35
 
@@ -26,17 +26,14 @@ void onReceive(const esp_now_recv_info_t *info,
 
   if (msg.teamId != TEAM_ID || msg.playerId == PLAYER_ID) return;
 
-  // Save incoming events for loop() to process
   xQueueSend(receivedEvents, &msg, 0);
 }
 
 void sendButton(int button) {
   Message msg = {TEAM_ID, PLAYER_ID, (uint8_t)button};
 
-  // Report our own press to Processing
   Serial.printf("%d,%d\n", PLAYER_ID, button);
 
-  // Broadcast to the other ESP32
   esp_now_send(broadcastAddress, (uint8_t *)&msg, sizeof(msg));
 }
 
@@ -59,7 +56,7 @@ void setup() {
   Serial.begin(115200);
 
   pinMode(BUTTON_A, INPUT_PULLUP);
-  pinMode(BUTTON_B, INPUT);  // External pull-up on this T-Display
+  pinMode(BUTTON_B, INPUT);      // GPIO 35 has an external pull-up on the board
 
   lastA = digitalRead(BUTTON_A);
   lastB = digitalRead(BUTTON_B);
@@ -85,7 +82,7 @@ void loop() {
   checkButton(BUTTON_A, 0, lastA, lastAAt);
   checkButton(BUTTON_B, 1, lastB, lastBAt);
 
-  // Forward remote button presses to Processing
+  // send button press data to processing via serial
   Message msg;
   while (xQueueReceive(receivedEvents, &msg, 0) == pdTRUE) {
     Serial.printf("%d,%d\n", msg.playerId, msg.buttonId);
